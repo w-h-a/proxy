@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"sync"
 
@@ -18,6 +19,7 @@ type config struct {
 	version     string
 	httpAddress string
 	httpTarget  string
+	faults      []Fault
 }
 
 func NewConfig() {
@@ -28,6 +30,7 @@ func NewConfig() {
 			version:     "0.1.0-alpha.0",
 			httpAddress: ":0",
 			httpTarget:  "localhost:9090",
+			faults:      []Fault{},
 		}
 
 		namespace := os.Getenv("NAMESPACE")
@@ -53,6 +56,17 @@ func NewConfig() {
 		httpTarget := os.Getenv("HTTP_TARGET")
 		if len(httpTarget) > 0 {
 			instance.httpTarget = httpTarget
+		}
+
+		faultsJSON := os.Getenv("FAULTS")
+		if len(faultsJSON) > 0 {
+			var faults []Fault
+
+			if err := json.Unmarshal([]byte(faultsJSON), &faults); err != nil {
+				log.Fatalf("failed to unmarshal %s faults JSON config: %v", faultsJSON, err)
+			}
+
+			instance.faults = faults
 		}
 	})
 }
@@ -95,4 +109,12 @@ func HttpTarget() string {
 	}
 
 	return instance.httpTarget
+}
+
+func Faults() []Fault {
+	if instance == nil {
+		log.Fatal("no config instance")
+	}
+
+	return instance.faults
 }
