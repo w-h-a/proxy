@@ -1,7 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/w-h-a/pkg/telemetry/log"
@@ -13,21 +15,27 @@ var (
 )
 
 type config struct {
-	namespace   string
-	name        string
-	version     string
-	httpAddress string
-	httpTarget  string
+	namespace           string
+	name                string
+	version             string
+	httpAddress         string
+	httpTargetNamespace string
+	httpTargetName      string
+	httpTargetPort      int
+	faults              []Fault
 }
 
 func NewConfig() {
 	once.Do(func() {
 		instance = &config{
-			namespace:   "dev",
-			name:        "proxy",
-			version:     "0.1.0-alpha.0",
-			httpAddress: ":0",
-			httpTarget:  "localhost:9090",
+			namespace:           "dev",
+			name:                "proxy",
+			version:             "0.1.0-alpha.0",
+			httpAddress:         ":0",
+			httpTargetNamespace: "dev",
+			httpTargetName:      "localhost",
+			httpTargetPort:      9090,
+			faults:              []Fault{},
 		}
 
 		namespace := os.Getenv("NAMESPACE")
@@ -50,9 +58,30 @@ func NewConfig() {
 			instance.httpAddress = httpAddress
 		}
 
-		httpTarget := os.Getenv("HTTP_TARGET")
-		if len(httpTarget) > 0 {
-			instance.httpTarget = httpTarget
+		httpTargetNamespace := os.Getenv("HTTP_TARGET_NAMESPACE")
+		if len(httpTargetNamespace) > 0 {
+			instance.httpTargetNamespace = httpTargetNamespace
+		}
+
+		httpTargetName := os.Getenv("HTTP_TARGET_NAME")
+		if len(httpTargetName) > 0 {
+			instance.httpTargetName = httpTargetName
+		}
+
+		httpTargetPort := os.Getenv("HTTP_TARGET_PORT")
+		if len(httpTargetPort) > 0 {
+			instance.httpTargetPort, _ = strconv.Atoi(httpTargetPort)
+		}
+
+		faultsJSON := os.Getenv("FAULTS")
+		if len(faultsJSON) > 0 {
+			var faults []Fault
+
+			if err := json.Unmarshal([]byte(faultsJSON), &faults); err != nil {
+				instance.faults = []Fault{}
+			} else {
+				instance.faults = faults
+			}
 		}
 	})
 }
@@ -89,10 +118,34 @@ func HttpAddress() string {
 	return instance.httpAddress
 }
 
-func HttpTarget() string {
+func HttpTargetNamespace() string {
 	if instance == nil {
 		log.Fatal("no config instance")
 	}
 
-	return instance.httpTarget
+	return instance.httpTargetNamespace
+}
+
+func HttpTargetName() string {
+	if instance == nil {
+		log.Fatal("no config instance")
+	}
+
+	return instance.httpTargetName
+}
+
+func HttpTargetPort() int {
+	if instance == nil {
+		log.Fatal("no config instance")
+	}
+
+	return instance.httpTargetPort
+}
+
+func Faults() []Fault {
+	if instance == nil {
+		log.Fatal("no config instance")
+	}
+
+	return instance.faults
 }
