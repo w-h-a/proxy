@@ -1,5 +1,8 @@
 package fault
 
 type Options struct {
-	Delay int `mapstructure:",omitempty"`
+	Delay   int
+	Status  int
+	Headers map[string]string
+	Body    string
 }

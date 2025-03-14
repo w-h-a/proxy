@@ -58,7 +58,10 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 	defer rsp.Body.Close()
 
 	for _, f := range p.faults {
-		f.HandleEvent(context.Background(), fault.POST_DISPATCH)
+		ctx := fault.CtxWithHttpRequest(context.Background(), req)
+		ctx = fault.CtxWithHttpResponse(ctx, rsp)
+
+		f.HandleEvent(ctx, fault.POST_DISPATCH)
 	}
 
 	for _, h := range p.hopHeaders {

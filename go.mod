@@ -6,7 +6,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/gorilla/mux v1.8.1
 	github.com/stretchr/testify v1.9.0
-	github.com/w-h-a/pkg v0.37.0
+	github.com/w-h-a/pkg v0.38.0
 )
 
 require (

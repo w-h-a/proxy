@@ -12,6 +12,7 @@ import (
 	httphandlers "github.com/w-h-a/proxy/src/handlers/http"
 	"github.com/w-h-a/proxy/src/services/fault"
 	httpdelay "github.com/w-h-a/proxy/src/services/fault/httpDelay"
+	httptamper "github.com/w-h-a/proxy/src/services/fault/httpTamper"
 )
 
 func AppFactory(httpClient http.RoundTripper) serverv2.Server {
@@ -21,6 +22,10 @@ func AppFactory(httpClient http.RoundTripper) serverv2.Server {
 	faultManager.Register(func(options fault.Options) (fault.Fault, error) {
 		return httpdelay.NewFault(options), nil
 	}, "httpdelay")
+
+	faultManager.Register(func(options fault.Options) (fault.Fault, error) {
+		return httptamper.NewFault(options), nil
+	}, "httptamper")
 
 	faults := []fault.Fault{}
 
