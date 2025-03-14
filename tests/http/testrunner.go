@@ -72,6 +72,8 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 		httpServer := src.AppFactory(httpClient)
 
 		// tests
+		var status int
+		var header gohttp.Header
 		var bs []byte
 
 		t.Run(testCase.When, func(t *testing.T) {
@@ -80,16 +82,25 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 
 			now := time.Now()
 
-			bs, err = httputils.HttpGet(fmt.Sprintf("http://%s%s%s", httpServer.Options().Address, testCase.Endpoint, testCase.Query))
+			status, header, bs, err = httputils.HttpGetV2(
+				fmt.Sprintf("http://%s%s%s", httpServer.Options().Address, testCase.Endpoint, testCase.Query),
+			)
 			require.NoError(t, err)
+
+			duration := time.Since(now).Seconds()
 
 			t.Log(testCase.Then)
 
-			duration := time.Since(now).Seconds()
 			require.GreaterOrEqual(t, duration, testCase.DurationGTE)
 			require.LessOrEqual(t, duration, testCase.DurationLTE)
 
 			require.Equal(t, testCase.Response, string(bs))
+
+			for k, v := range testCase.Header {
+				require.Equal(t, v[0], header.Get(k))
+			}
+
+			require.Equal(t, testCase.Status, status)
 
 			t.Cleanup(func() {
 				err = httpServer.Stop()
