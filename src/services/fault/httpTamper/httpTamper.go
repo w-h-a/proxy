@@ -1,7 +1,9 @@
 package httptamper
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/w-h-a/proxy/src/services/fault"
@@ -33,7 +35,7 @@ func (f *httpTamper) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
 		}
 
 		if f.options.Body != "" {
-			body := &rspBody{body: []byte(f.options.Body)}
+			body := io.NopCloser(bytes.NewReader([]byte(f.options.Body)))
 
 			r := &http.Response{
 				Request:       req,
@@ -50,7 +52,7 @@ func (f *httpTamper) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
 		}
 
 		for k, v := range f.options.Headers {
-			rsp.Header.Add(k, v)
+			rsp.Header.Set(k, v)
 		}
 
 		if f.options.Status != 0 {
