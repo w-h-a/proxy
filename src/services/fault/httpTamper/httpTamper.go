@@ -18,6 +18,10 @@ func (f *httpTamper) Options() fault.Options {
 }
 
 func (f *httpTamper) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
+	if !fault.ShouldApply(ctx, f.options.Rules) {
+		return
+	}
+
 	switch event {
 	case fault.POST_DISPATCH:
 		var req *http.Request

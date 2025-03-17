@@ -16,6 +16,10 @@ func (f *httpDelay) Options() fault.Options {
 }
 
 func (f *httpDelay) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
+	if !fault.ShouldApply(ctx, f.options.Rules) {
+		return
+	}
+
 	switch event {
 	case fault.PRE_DISPATCH:
 		delay := time.Duration(f.options.Delay) * time.Second

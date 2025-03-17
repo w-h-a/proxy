@@ -41,6 +41,14 @@ func AppFactory(httpClient http.RoundTripper) serverv2.Server {
 			log.Fatalf("failed to apply fault configuration for %s: %v", f.Name, err)
 		}
 
+		if len(options.Rules) == 0 {
+			options.Rules = append(options.Rules, fault.Rule{
+				Endpoint:   ".*",
+				HttpMethod: ".*",
+				Percentage: 0,
+			})
+		}
+
 		faultService, err := factory(options)
 		if err != nil {
 			log.Fatalf("invoking the fault factory for %s resulted in an error: %v", f.Name, err)
