@@ -46,7 +46,9 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, f := range p.faults {
-		f.HandleEvent(context.Background(), fault.PRE_DISPATCH)
+		ctx := fault.CtxWithHttpRequest(context.Background(), req)
+
+		f.HandleEvent(ctx, fault.PRE_DISPATCH)
 	}
 
 	rsp, err := p.client.RoundTrip(req)

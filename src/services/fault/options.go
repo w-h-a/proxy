@@ -5,4 +5,5 @@ type Options struct {
 	Status  int
 	Headers map[string]string
 	Body    string
+	Rules   []Rule
 }
