@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"io"
 	gohttp "net/http"
 	"net/http/httptest"
 	"net/url"
@@ -13,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/w-h-a/pkg/telemetry/log"
 	memorylog "github.com/w-h-a/pkg/telemetry/log/memory"
-	"github.com/w-h-a/pkg/utils/httputils"
 	"github.com/w-h-a/pkg/utils/memoryutils"
 	"github.com/w-h-a/proxy/src"
 	httpclient "github.com/w-h-a/proxy/src/clients/http"
@@ -28,7 +28,7 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 			require.Equal(t, "", r.Header.Get("keep-alive"))
 
 			if r.URL.Path == testCase.Endpoint {
-				w.Write([]byte(testCase.Response))
+				w.Write([]byte("I am the backend"))
 			} else {
 				gohttp.NotFound(w, r)
 			}
@@ -72,20 +72,18 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 		httpServer := src.AppFactory(httpClient)
 
 		// tests
-		var status int
-		var header gohttp.Header
-		var bs []byte
-
 		t.Run(testCase.When, func(t *testing.T) {
 			err = httpServer.Run()
 			require.NoError(t, err)
 
 			now := time.Now()
 
-			status, header, bs, err = httputils.HttpGetV2(
-				fmt.Sprintf("http://%s%s%s", httpServer.Options().Address, testCase.Endpoint, testCase.Query),
-			)
+			rsp, err := gohttp.Get(fmt.Sprintf("http://%s%s%s", httpServer.Options().Address, testCase.Endpoint, testCase.Query))
 			require.NoError(t, err)
+
+			bs, err := io.ReadAll(rsp.Body)
+			require.NoError(t, err)
+			defer rsp.Body.Close()
 
 			duration := time.Since(now).Seconds()
 
@@ -96,11 +94,11 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 
 			require.Equal(t, testCase.Response, string(bs))
 
-			for k, v := range testCase.Header {
-				require.Equal(t, v[0], header.Get(k))
-			}
+			require.Equal(t, testCase.Status, rsp.StatusCode)
 
-			require.Equal(t, testCase.Status, status)
+			for k, v := range testCase.Header {
+				require.Equal(t, v[0], rsp.Header.Get(k))
+			}
 
 			t.Cleanup(func() {
 				err = httpServer.Stop()

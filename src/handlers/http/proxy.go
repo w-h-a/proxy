@@ -72,16 +72,20 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rspHeader := w.Header()
-
 	for k, h := range rsp.Header {
-		for _, v := range h {
-			rspHeader.Add(k, v)
+		if k != "Content-Length" {
+			for _, v := range h {
+				w.Header().Add(k, v)
+			}
 		}
 	}
 
 	w.WriteHeader(rsp.StatusCode)
-	io.Copy(w, rsp.Body)
+
+	if rsp.Body != nil {
+		bs, _ := io.ReadAll(rsp.Body)
+		w.Write(bs)
+	}
 }
 
 func NewProxy(
