@@ -24,36 +24,7 @@ func (f *httpTamper) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
 
 	switch event {
 	case fault.POST_DISPATCH:
-		var req *http.Request
-		if r, ok := fault.HttpRequestFromCtx(ctx); !ok {
-			return
-		} else {
-			req = r
-		}
-
-		var rsp *http.Response
-		if r, ok := fault.HttpResponseFromCtx(ctx); !ok {
-			return
-		} else {
-			rsp = r
-		}
-
-		if f.options.Body != "" {
-			body := io.NopCloser(bytes.NewReader([]byte(f.options.Body)))
-
-			r := &http.Response{
-				Request:       req,
-				Header:        rsp.Header,
-				Close:         rsp.Close,
-				ContentLength: rsp.ContentLength,
-				TLS:           rsp.TLS,
-				Status:        rsp.Status,
-				StatusCode:    rsp.StatusCode,
-				Body:          body,
-			}
-
-			*rsp = *r
-		}
+		rsp, _ := fault.HttpResponseFromCtx(ctx)
 
 		for k, v := range f.options.Headers {
 			rsp.Header.Set(k, v)
@@ -62,6 +33,20 @@ func (f *httpTamper) HandleEvent(ctx context.Context, event fault.ProxyEvent) {
 		if f.options.Status != 0 {
 			rsp.StatusCode = f.options.Status
 			rsp.Status = http.StatusText(f.options.Status)
+		}
+
+		if f.options.Body != "" {
+			if rsp.Body != nil {
+				_, _ = io.ReadAll(rsp.Body)
+				rsp.Body.Close()
+			}
+
+			bs := []byte(f.options.Body)
+
+			body := io.NopCloser(bytes.NewBuffer(bs))
+
+			rsp.Body = body
+			rsp.ContentLength = int64(len(bs))
 		}
 	}
 }
