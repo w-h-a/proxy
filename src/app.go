@@ -11,8 +11,8 @@ import (
 	"github.com/w-h-a/proxy/src/config"
 	httphandlers "github.com/w-h-a/proxy/src/handlers/http"
 	"github.com/w-h-a/proxy/src/services/fault"
-	httpdelay "github.com/w-h-a/proxy/src/services/fault/httpDelay"
-	httptamper "github.com/w-h-a/proxy/src/services/fault/httpTamper"
+	"github.com/w-h-a/proxy/src/services/fault/httpdelay"
+	"github.com/w-h-a/proxy/src/services/fault/httptamper"
 )
 
 func AppFactory(httpClient http.RoundTripper) serverv2.Server {
