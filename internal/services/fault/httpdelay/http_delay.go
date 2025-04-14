@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/w-h-a/proxy/src/services/fault"
+	"github.com/w-h-a/proxy/internal/services/fault"
 )
 
 type httpDelay struct {

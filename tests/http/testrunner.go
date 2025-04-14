@@ -15,9 +15,9 @@ import (
 	"github.com/w-h-a/pkg/telemetry/log"
 	memorylog "github.com/w-h-a/pkg/telemetry/log/memory"
 	"github.com/w-h-a/pkg/utils/memoryutils"
-	"github.com/w-h-a/proxy/src"
-	httpclient "github.com/w-h-a/proxy/src/clients/http"
-	"github.com/w-h-a/proxy/src/config"
+	"github.com/w-h-a/proxy/internal"
+	httpclient "github.com/w-h-a/proxy/internal/clients/http"
+	"github.com/w-h-a/proxy/internal/config"
 )
 
 func RunTestCases(t *testing.T, testCases []TestCase) {
@@ -48,7 +48,7 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 		os.Setenv("FAULTS", testCase.Faults)
 
 		// config
-		config.NewConfig()
+		config.New()
 
 		// name
 		name := fmt.Sprintf("%s.%s", config.Namespace(), config.Name())
@@ -69,7 +69,7 @@ func RunTestCases(t *testing.T, testCases []TestCase) {
 		httpClient := httpclient.NewHttpClient()
 
 		// servers
-		httpServer := src.AppFactory(httpClient)
+		httpServer := internal.Factory(httpClient)
 
 		// tests
 		t.Run(testCase.When, func(t *testing.T) {

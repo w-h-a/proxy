@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/w-h-a/proxy/src/services/fault"
+	"github.com/w-h-a/proxy/internal/services/fault"
 )
 
 type httpTamper struct {

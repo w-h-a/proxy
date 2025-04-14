@@ -1,4 +1,4 @@
-package src
+package internal
 
 import (
 	"net/http"
@@ -8,14 +8,14 @@ import (
 	"github.com/w-h-a/pkg/serverv2"
 	httpserver "github.com/w-h-a/pkg/serverv2/http"
 	"github.com/w-h-a/pkg/telemetry/log"
-	"github.com/w-h-a/proxy/src/config"
-	httphandlers "github.com/w-h-a/proxy/src/handlers/http"
-	"github.com/w-h-a/proxy/src/services/fault"
-	"github.com/w-h-a/proxy/src/services/fault/httpdelay"
-	"github.com/w-h-a/proxy/src/services/fault/httptamper"
+	"github.com/w-h-a/proxy/internal/config"
+	httphandlers "github.com/w-h-a/proxy/internal/handlers/http"
+	"github.com/w-h-a/proxy/internal/services/fault"
+	"github.com/w-h-a/proxy/internal/services/fault/httpdelay"
+	"github.com/w-h-a/proxy/internal/services/fault/httptamper"
 )
 
-func AppFactory(httpClient http.RoundTripper) serverv2.Server {
+func Factory(httpClient http.RoundTripper) serverv2.Server {
 	// faults
 	faultManager := fault.NewManager()
 
