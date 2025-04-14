@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/w-h-a/pkg/telemetry/log"
-	"github.com/w-h-a/proxy/src/services/fault"
+	"github.com/w-h-a/proxy/internal/services/fault"
 )
 
 type Proxy struct {

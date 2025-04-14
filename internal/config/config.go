@@ -26,7 +26,7 @@ type config struct {
 	faults              []Fault
 }
 
-func NewConfig() {
+func New() {
 	once.Do(func() {
 		instance = &config{
 			namespace:           "dev",
